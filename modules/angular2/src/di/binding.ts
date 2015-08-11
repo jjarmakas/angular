@@ -223,6 +223,7 @@ export class Binding {
  * value, are just convenience methods, as {@link Injector} only operates on calling factory
  * functions.
  */
+@CONST()
 export class ResolvedBinding {
   constructor(
       /**
