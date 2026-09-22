@@ -1,0 +1,8 @@
+Create IBM MQ queue archiver.
+
+MQ version 9.2.3.0
+IBM integration toolkit version 10.0.0.24
+
+Create code for JavaCompute Node to read number of messages in queues and if the number of messages exceeds a limit, move all the messages to a file.
+
+The file should have a name of a queue with ".txt" extension and should be placed in a folder with Archive_YYYYMMDD folder where YYYYMMDD is the date when the archiving accurs.
