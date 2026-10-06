@@ -1,0 +1,66 @@
+# mqwf configuration. Copy to mqwf.properties next to mqwf.cmd and adjust.
+# Java properties format: comments must be on their own line.
+
+# ---------------------------------------------------------------- Queue manager
+mq.qmgr=QM1
+# bindings = run on the MQ server itself (recommended: no channel exposure).
+# client   = connect over a SVRCONN channel.
+mq.connection=bindings
+#mq.host=mqhost.example.com
+#mq.port=1414
+#mq.channel=MQWF.ADMIN.SVRCONN
+#mq.sslCipherSuite=TLS_RSA_WITH_AES_256_CBC_SHA256
+# Optional explicit credentials (CONNAUTH). The password is read from the named
+# environment variable; plain-text passwords in this file are rejected.
+#mq.user=mqwfadm
+#mq.password.env=MQWF_MQ_PASSWORD
+
+# ------------------------------------------ IIB / App Connect Enterprise (REST)
+# apiv1 = IBM Integration Bus v10 (e.g. 10.0.0.24)
+# apiv2 = App Connect Enterprise v11 / v12
+ace.api=apiv1
+# Integration node web admin port (default 4414; see mqsireportproperties <node> -b webadmin -o HTTPConnector -r).
+# ACE standalone integration servers use 7600.
+ace.url=https://iibhost.example.com:4414
+# node   = integration node (workflow.<name>.server = integration server / execution group name)
+# server = ACE standalone integration server (not available with apiv1)
+ace.mode=node
+#ace.user=mqwfadm
+#ace.password.env=MQWF_ACE_PASSWORD
+ace.httpTimeoutSeconds=120
+# How long to wait for a flow to report stopped/started after the request.
+ace.flowStateTimeoutSeconds=300
+
+# ------------------------------------------------------------------- Draining
+# Maximum time to wait for a queue to empty (can be overridden per workflow or with --timeout).
+drain.timeoutSeconds=1800
+drain.pollIntervalSeconds=5
+# Consecutive checks with CURDEPTH=0 AND UNCOM=0 required before the queue counts as empty.
+drain.stablePolls=3
+# MQ_TO_DB only: abort early if messages wait but nothing has the queue open for this many checks.
+drain.stallPolls=12
+
+# Relative to this file.
+audit.dir=logs
+lock.dir=locks
+
+# ------------------------------------------------------------------ Workflows
+# Every workflow, comma-separated, in processing order. "mqwf shutdown"
+# and "mqwf start" without names process them one at a time, in this order.
+# Each listed name needs workflow.<NAME>.* entries, and every workflow.<NAME>.* must be listed.
+workflows=ORDERS_EXPORT,PAYMENTS_IMPORT
+
+# type DB_TO_MQ: DatabaseInput -> MQOutput -> queue, read by a remote client.
+workflow.ORDERS_EXPORT.type=DB_TO_MQ
+workflow.ORDERS_EXPORT.queue=APP.ORDERS.EXPORT
+workflow.ORDERS_EXPORT.server=IS_ORDERS
+workflow.ORDERS_EXPORT.application=OrdersApp
+workflow.ORDERS_EXPORT.flow=OrdersExportFlow
+
+# type MQ_TO_DB: remote client -> queue -> MQInput -> Database node.
+workflow.PAYMENTS_IMPORT.type=MQ_TO_DB
+workflow.PAYMENTS_IMPORT.queue=APP.PAYMENTS.IMPORT
+workflow.PAYMENTS_IMPORT.server=IS_PAYMENTS
+workflow.PAYMENTS_IMPORT.application=PaymentsApp
+workflow.PAYMENTS_IMPORT.flow=PaymentsImportFlow
+workflow.PAYMENTS_IMPORT.drainTimeoutSeconds=3600
